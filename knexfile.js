@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
   development: {
-    debug: true,
+    // debug: true,
     client: 'pg',
     connection: {
       host: '127.0.0.1',
