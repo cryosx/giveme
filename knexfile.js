@@ -1,5 +1,7 @@
 // Update with your config settings.
 
+const path = require('path');
+
 module.exports = {
   development: {
     debug: true,
