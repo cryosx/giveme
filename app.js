@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const session = require('express-session');
+const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const Redis = require('connect-redis')(session);
@@ -24,6 +25,8 @@ app.use(
     saveUninitialized: true
   })
 );
+app.use(flash());
+
 app.use(methodOverride('_method'));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -89,25 +92,29 @@ passport.use(
 app
   .route('/register')
   .get((req, res) => {
-    return res.redirect('register.html');
+    return res.json({ message: 'Not implemented' });
   })
   .post((req, res) => {
-    bcrypt.genSalt(saltedRounds, function(err, salt) {
+    const { email, username, password } = req.body;
+
+    bcrypt.genSalt(saltedRounds, (err, salt) => {
       if (err) console.log(err);
 
-      bcrypt.hash(req.body.password, salt, function(err, hash) {
+      bcrypt.hash(password, salt, (err, hash) => {
         if (err) console.log(err);
-        const { email, username } = req.body;
 
         new User({ email, username, password: hash })
           .save()
           .then(user => {
             // console.log(user);
-            return res.redirect('/');
+            return req.login(user, err => {
+              if (err) return next(err);
+              return res.json({ user });
+            });
           })
           .catch(err => {
             // console.log(err);
-            return res.send('Wrong username');
+            return res.json({ message: 'Error' });
           });
       });
     });
@@ -116,12 +123,14 @@ app
 app
   .route('/login')
   .get((req, res) => {
-    return res.redirect('/login.html');
+    return res.json({ message: 'Not implemented' });
   })
   .post(
     passport.authenticate('local', {
       successRedirect: '/',
-      failureRedirect: '/login'
+      failureRedirect: '/login',
+      failureFlash: 'Invalid username or password.',
+      successFlash: 'Welcome!'
     })
   );
 

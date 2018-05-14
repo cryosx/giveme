@@ -7,14 +7,7 @@ const User = require('../db/models/User.js');
 const router = express.Router();
 
 router.route('/').get((req, res) => {
-  new User({ username: 'user', email: 'user@user.com', password: 'password' })
-    .save()
-    .then(user => {
-      return res.json({ user });
-    })
-    .catch(err => {
-      return res.json({ err });
-    });
+  return res.json({ message: 'Not implemented' });
 });
 
 router.use('/user', user);

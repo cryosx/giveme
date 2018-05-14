@@ -17,6 +17,7 @@ exports.up = function(knex, Promise) {
       .foreign('task_id')
       .references('id')
       .inTable('tasks');
+    table.primary(['user_id', 'task_id']);
   });
 
   return;

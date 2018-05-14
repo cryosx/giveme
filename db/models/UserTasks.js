@@ -5,9 +5,12 @@ class UserTasks extends bookshelf.Model {
     return 'user_tasks';
   }
   get hasTimestamps() {
-    return true;
+    return false;
   }
 
+  get idAttribute() {
+    return null;
+  }
   user() {
     return this.belongsTo('User', 'user_id');
   }
