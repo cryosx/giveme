@@ -11,6 +11,10 @@ class Task extends bookshelf.Model {
   owner() {
     return this.belongsTo('User', 'owner_id');
   }
+
+  participants() {
+    return this.belongsToMany('User', 'user_tasks');
+  }
 }
 
 module.exports = bookshelf.model('Task', Task);

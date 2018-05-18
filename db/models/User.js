@@ -8,7 +8,11 @@ class User extends bookshelf.Model {
     return true;
   }
 
-  tasks() {
+  activeTasks() {
+    return this.belongsToMany('Task', 'user_tasks');
+  }
+
+  myTasks() {
     return this.hasMany('Task', 'owner_id');
   }
 }

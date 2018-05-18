@@ -15,7 +15,11 @@ const app = express();
 
 const saltedRounds = 12;
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+);
 app.use(bodyParser.json());
 app.use(
   session({
@@ -43,11 +47,15 @@ passport.serializeUser((user, done) => {
 // after every request
 passport.deserializeUser((user, done) => {
   console.log('deserializing');
-  new User({ id: user.id })
+  new User({
+    id: user.id
+  })
     .fetch()
     .then(user => {
       if (user === null) {
-        return done(null, false, { message: 'no user' });
+        return done(null, false, {
+          message: 'no user'
+        });
       }
       user = user.toJSON();
       return done(null, {
@@ -67,18 +75,25 @@ passport.use(
     password,
     done
   ) {
-    return new User({ email })
+    return new User({
+      email
+    })
       .fetch()
       .then(user => {
         if (user === null) {
-          return done(null, false, { message: 'bad email or password' });
+          return done(null, false, {
+            message: 'bad email or password'
+          });
         }
         user = user.toJSON();
         bcrypt.compare(password, user.password).then(res => {
           if (res) {
+            console.log('LOGGED IN');
             return done(null, user);
           } else {
-            return done(null, false, { message: 'bad usernamr or password' });
+            return done(null, false, {
+              message: 'bad usernamr or password'
+            });
           }
         });
       })
@@ -90,60 +105,88 @@ passport.use(
 );
 
 app
-  .route('/register')
+  .route('/api/register')
   .get((req, res) => {
-    return res.json({ message: 'Not implemented' });
+    return res.json({
+      message: 'Not implemented'
+    });
   })
   .post((req, res) => {
+    console.log(req);
     const { email, username, password } = req.body;
 
     bcrypt.genSalt(saltedRounds, (err, salt) => {
-      if (err) console.log(err);
+      if (err) {
+        // console.log(err);
+        console.log('SALT ERR');
+        return res.status(500).json({ err });
+      }
 
       bcrypt.hash(password, salt, (err, hash) => {
-        if (err) console.log(err);
-
-        new User({ email, username, password: hash })
+        if (err) {
+          console.log('HASH ERR');
+          return res.status(500).json({ err });
+        }
+        new User({
+          email,
+          username,
+          password: hash
+        })
           .save()
           .then(user => {
-            // console.log(user);
+            console.log('USER CREATED');
             return req.login(user, err => {
-              if (err) return next(err);
+              // if (err) return next(err);
+              if (err) throw new Error(err);
               return res.json({ user });
             });
           })
           .catch(err => {
             // console.log(err);
-            return res.json({ message: 'Error' });
+            console.log('Error');
+            return res.status(500).json({
+              message: 'Error'
+            });
           });
       });
     });
   });
 
 app
-  .route('/login')
+  .route('/api/login')
   .get((req, res) => {
-    return res.json({ message: 'Not implemented' });
+    return res.json({
+      message: 'Not implemented'
+    });
   })
   .post(
-    passport.authenticate('local', {
-      successRedirect: '/',
-      failureRedirect: '/login',
-      failureFlash: 'Invalid username or password.',
-      successFlash: 'Welcome!'
-    })
+    // passport.authenticate('local', {
+    //   successRedirect: '/api',
+    //   failureRedirect: '/api/login',
+    //   failureFlash: 'Invalid username or password.',
+    //   successFlash: 'Welcome!'
+    // })
+    passport.authenticate('local'),
+    (req, res) => {
+      const { id, email, username } = req.user;
+      const user = { id, email, username };
+      console.log(user);
+      return res.json(user);
+    }
   );
 
-app.route('/logout').get((req, res) => {
+app.route('/api/logout').get((req, res) => {
   req.logout();
-  return res.redirect('/');
+  return res.json({ success: true });
+
+  // return res.redirect('/api');
 });
 
-app.use('/', routes);
+app.use('/api', routes);
 
 app.route('*').get((req, res) => {
   console.log('\nCatchall\n');
-  return res.redirect('/');
+  return res.redirect('/api');
 });
 
 module.exports = app;

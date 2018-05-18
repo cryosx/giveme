@@ -10,6 +10,12 @@ const router = express.Router();
 router.route('/').get((req, res) => {
   return Task.fetchAll({ withRelated: ['owner'] })
     .then(tasks => {
+      // res.set({
+      //   'Access-Control-Allow-Headers': 'Content-Type',
+      //   'Access-Control-Allow-Methods': 'GET, POST',
+      //   'Access-Control-Allow-Origin': '*'
+      // });
+      console.log(tasks);
       return res.json(tasks);
     })
     .catch(err => {
@@ -18,13 +24,20 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/new').post(isAuthenticated, (req, res) => {
-  const { title, description, lat, lng, reward } = req.body;
+  const { title, description, location, reward, expires_at } = req.body;
   const { id } = req.user;
 
-  const location = { lat, lng };
+  // const location = { lat, lng };
   // const jsonLocation = JSON.stringify(location);
 
-  return new Task({ title, description, location, reward, owner_id: id })
+  return new Task({
+    title,
+    description,
+    reward,
+    location,
+    expires_at,
+    owner_id: id
+  })
     .save()
     .then(task => {
       return res.json(task);
@@ -49,15 +62,26 @@ router.route('/:id/accept').get(isAuthenticated, (req, res) => {
   // return UserTasks.fetchAll().then(userTasks => {
   //   return res.json(userTasks);
   // });
-  return new UserTasks({ user_id, task_id })
-    .save()
-    .then(userTask => {
-      return res.json(userTask);
+  return new Task({ id: task_id })
+    .participants()
+    .attach(user_id)
+    .then(data => {
+      return res.json({ success: true });
     })
     .catch(err => {
-      console.log(err);
-      return res.json(err);
+      const { code } = err;
+      if (code === '23505') console.log(err);
+      return res.status(400).json(err);
     });
+  // return new UserTasks({ user_id, task_id })
+  //   .save()
+  //   .then(userTask => {
+  //     return res.json(userTask);
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //     return res.json(err);
+  //   });
 });
 router.route('/:id').get((req, res) => {
   const { id } = req.params;
