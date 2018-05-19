@@ -59,9 +59,7 @@ router.route('/clear').get((req, res) => {
 router.route('/:id/accept').get(isAuthenticated, (req, res) => {
   const user_id = req.user.id;
   const task_id = req.params.id;
-  // return UserTasks.fetchAll().then(userTasks => {
-  //   return res.json(userTasks);
-  // });
+
   return new Task({ id: task_id })
     .participants()
     .attach(user_id)
@@ -73,16 +71,26 @@ router.route('/:id/accept').get(isAuthenticated, (req, res) => {
       if (code === '23505') console.log(err);
       return res.status(400).json(err);
     });
-  // return new UserTasks({ user_id, task_id })
-  //   .save()
-  //   .then(userTask => {
-  //     return res.json(userTask);
-  //   })
-  //   .catch(err => {
-  //     console.log(err);
-  //     return res.json(err);
-  //   });
 });
+
+router.route('/:id/leave').get(isAuthenticated, (req, res) => {
+  console.log('\n\nLEAVE\n\n');
+  const user_id = req.user.id;
+  const task_id = req.params.id;
+
+  return new Task({ id: task_id })
+    .participants()
+    .detach(user_id)
+    .then(data => {
+      return res.json({ success: true });
+    })
+    .catch(err => {
+      const { code } = err;
+      if (code === '23505') console.log(err);
+      return res.status(400).json(err);
+    });
+});
+
 router.route('/:id').get((req, res) => {
   const { id } = req.params;
 
@@ -98,5 +106,19 @@ function isAuthenticated(req, res, next) {
   if (!req.isAuthenticated()) return res.redirect('/');
   return next();
 }
+
+// function isAuthorized(req, res, next) {
+//   if (!req.isAuthenticated()) {
+//     return res.status(401).json({ authenticated: false });
+//   }
+
+//   const { id } = req.params;
+//   const user_id = req.user.id;
+
+//   if (id != user_id) {
+//     return res.status(401).json({ authorized: false });
+//   }
+//   return next();
+// }
 
 module.exports = router;
