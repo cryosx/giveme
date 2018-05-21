@@ -112,7 +112,6 @@ app
     });
   })
   .post((req, res) => {
-    console.log(req);
     const { email, username, password } = req.body;
 
     bcrypt.genSalt(saltedRounds, (err, salt) => {
@@ -170,7 +169,7 @@ app
     (req, res) => {
       const { id, email, username } = req.user;
       const user = { id, email, username };
-      console.log(user);
+      // console.log(user);
       return res.json(user);
     }
   );

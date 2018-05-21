@@ -23,7 +23,7 @@ exports.up = function(knex, Promise) {
         .add(1, 'day')
         .format()
     );
-    table.timestamp('completed_at');
+    table.timestamp('completed_at').defaultTo(null);
     table.timestamps(true, true);
   });
 

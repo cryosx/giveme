@@ -41,7 +41,6 @@ router.route('/:id').get(isAuthorized, (req, res) => {
   return new User({ id })
     .fetch({ withRelated: ['myTasks', 'activeTasks'] })
     .then(user => {
-      console.log(user);
       return res.json(user);
     })
     .catch(err => {
