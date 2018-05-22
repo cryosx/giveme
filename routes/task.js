@@ -59,16 +59,28 @@ router.route('/:id/mark-complete').get(isAuthenticated, (req, res) => {
   const user_id = req.user.id;
   const task_id = req.params.id;
 
-  return new Task({ id: task_id })
-    .participants()
-    .then(participants => {
-      // participants.
-    })
-    .catch();
+  // return new Task({ id: task_id })
+  //   .fetch({ withRelated: ['participants'] })
+  //   .then(task => {
+  //     task = task.toJSON();
+  //     const isParticipating = task.participants.some(participant => {
+  //       return participant.id === user_id;
+  //     });
+  //     if (!isParticipating) {
+  //       return res.status(401).json({ message: 'You are not participating' });
+  //     }
+  //   })
+  //   .catch();
 });
 router.route('/:id/confirm-complete').get(isAuthorized, (req, res) => {
   const user_id = req.user.id;
   const task_id = req.params.id;
+  return new Task({ id: task_id })
+    .save({ completed_at: moment().format() }, { patch: true })
+    .then(task => {
+      return res.json(task);
+    })
+    .catch();
 });
 
 router.route('/:id/accept').get(isAuthenticated, (req, res) => {

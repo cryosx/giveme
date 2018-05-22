@@ -17,24 +17,6 @@ router.route('/').get(isAuthenticated, (req, res) => {
 
 // });
 
-router.route('/:id/task/:task_id/leave').get(isAuthorized, (req, res) => {
-  console.log('\n\nLEAVE\n\n');
-  const user_id = req.user.id;
-  const task_id = req.params.task_id;
-
-  return new Task({ id: task_id })
-    .participants()
-    .dettach(user_id)
-    .then(data => {
-      return res.json({ success: true });
-    })
-    .catch(err => {
-      const { code } = err;
-      if (code === '23505') console.log(err);
-      return res.status(400).json(err);
-    });
-});
-
 router.route('/:id').get(isAuthorized, (req, res) => {
   const { id } = req.user;
 

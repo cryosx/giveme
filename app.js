@@ -137,7 +137,7 @@ app
             return req.login(user, err => {
               // if (err) return next(err);
               if (err) throw new Error(err);
-              return res.json({ user });
+              return res.json(user);
             });
           })
           .catch(err => {

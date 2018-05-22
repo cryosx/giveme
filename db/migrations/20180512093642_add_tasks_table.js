@@ -17,12 +17,7 @@ exports.up = function(knex, Promise) {
       .foreign('owner_id')
       .references('id')
       .inTable('users');
-    table.timestamp('expires_at').defaultTo(
-      moment()
-        .utc()
-        .add(1, 'day')
-        .format()
-    );
+    table.timestamp('expires_at');
     table.timestamp('completed_at').defaultTo(null);
     table.timestamps(true, true);
   });
